@@ -38,6 +38,8 @@ endif()
 
 project(acados LANGUAGES C CXX)
 
+find_package(ament_cmake REQUIRED)
+
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
 set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
@@ -356,3 +358,14 @@ file(APPEND lib/link_libs.json \t\"hpmpc\":\ \"${LINK_FLAG_HPMPC}\",\n)
 # file(APPEND lib/link_libs.json \t\"qore\":\ \"${LINK_FLAG_QORE}\",\n)
 file(APPEND lib/link_libs.json \t\"ooqp\":\ \"${LINK_FLAG_OOQP}\"\n) # no final comma!
 file(APPEND lib/link_libs.json })
+
+ament_export_include_directories(
+  include
+  include/acados
+  include/acados_c
+  include/blasfeo/include
+  include/hpipm/include
+)
+ament_export_libraries(acados hpipm blasfeo)
+ament_export_dependencies(ament_cmake)
+ament_package()
