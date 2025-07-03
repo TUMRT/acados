@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>acados</name>
+  <version>0.5.0</version>
+  <description>acados as a wrapped colcon package</description>
+  <maintainer email="joscha.bongard@tum.de">Joscha Bongard</maintainer>
+  <license>LGPLv3</license>
+  <buildtool_depend>cmake</buildtool_depend>
+</package>
