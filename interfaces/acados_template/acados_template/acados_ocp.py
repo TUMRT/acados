@@ -384,6 +384,7 @@ class AcadosOcp:
         model = self.model
         opts = self.solver_options
         if opts.N_horizon == 0:
+            dims.nbxe_0 = 0
             return
 
         nbx_0 = constraints.idxbx_0.shape[0]
@@ -927,6 +928,8 @@ class AcadosOcp:
                     raise ValueError('cost_discretization == INTEGRATOR is not compatible with SQP_WITH_FEASIBLE_QP yet.')
 
         ## constraints
+        if opts.qp_solver == 'PARTIAL_CONDENSING_QPDUNES':
+            self.remove_x0_elimination()
         self._make_consistent_constraints_initial()
         self._make_consistent_constraints_path()
         self._make_consistent_constraints_terminal()
@@ -956,9 +959,6 @@ class AcadosOcp:
             raise ValueError(f'cost_scaling should be of length N+1 = {opts.N_horizon+1}, got {opts.cost_scaling.shape[0]}.')
 
         self._make_consistent_simulation()
-
-        if opts.qp_solver == 'PARTIAL_CONDENSING_QPDUNES':
-            self.remove_x0_elimination()
 
         # fixed hessian
         if opts.fixed_hess:
@@ -2155,6 +2155,9 @@ class AcadosOcp:
     def get_initial_cost_expression(self):
         model = self.model
         if self.cost.cost_type == "LINEAR_LS":
+            if is_empty(self.cost.Vx_0):
+                return 0
+
             y = self.cost.Vx_0 @ model.x + self.cost.Vu_0 @ model.u
 
             if not is_empty(self.cost.Vz_0):
@@ -2181,6 +2184,9 @@ class AcadosOcp:
     def get_path_cost_expression(self):
         model = self.model
         if self.cost.cost_type == "LINEAR_LS":
+            if is_empty(self.cost.Vx):
+                return 0
+
             y = self.cost.Vx @ model.x + self.cost.Vu @ model.u
 
             if not is_empty(self.cost.Vz):
@@ -2213,18 +2219,18 @@ class AcadosOcp:
             residual = y - self.cost.yref_e
             cost_dot = 0.5 * (residual.T @ self.cost.W_e @ residual)
 
-        elif self.cost.cost_type == "NONLINEAR_LS":
+        elif self.cost.cost_type_e == "NONLINEAR_LS":
             residual = model.cost_y_expr_e - self.cost.yref_e
             cost_dot = 0.5 * (residual.T @ self.cost.W_e @ residual)
 
-        elif self.cost.cost_type == "EXTERNAL":
+        elif self.cost.cost_type_e == "EXTERNAL":
             cost_dot = model.cost_expr_ext_cost_e
 
-        elif self.cost.cost_type == "CONVEX_OVER_NONLINEAR":
+        elif self.cost.cost_type_e == "CONVEX_OVER_NONLINEAR":
             cost_dot = ca.substitute(
             model.cost_psi_expr_e, model.cost_r_in_psi_expr_e, model.cost_y_expr_e)
         else:
-            raise ValueError("create_model_with_cost_state: Unknown terminal cost type.")
+            raise ValueError(f"create_model_with_cost_state: Unknown terminal cost type {self.cost.cost_type_e}.")
 
         return cost_dot
 

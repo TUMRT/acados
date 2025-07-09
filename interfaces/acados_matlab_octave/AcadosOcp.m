@@ -212,6 +212,7 @@ classdef AcadosOcp < handle
             constraints = self.constraints;
             model = self.model;
             if self.solver_options.N_horizon == 0
+                dims.nbxe_0 = 0;
                 return
             end
 
@@ -874,6 +875,11 @@ classdef AcadosOcp < handle
 
 
             %% constraints
+            % qpdunes
+            if ~isempty(strfind(opts.qp_solver, 'QPDUNES'))
+                constraints.idxbxe_0 = [];
+                dims.nbxe_0 = 0;
+            end
             self.make_consistent_constraints_initial();
             self.make_consistent_constraints_path();
             self.make_consistent_constraints_terminal();
@@ -911,12 +917,6 @@ classdef AcadosOcp < handle
             end
 
             self.make_consistent_simulation();
-
-            % qpdunes
-            if ~isempty(strfind(opts.qp_solver,'qpdunes'))
-                constraints.idxbxe_0 = [];
-                dims.nbxe_0 = 0;
-            end
 
             if strcmp(opts.qp_solver, "PARTIAL_CONDENSING_HPMPC") || ...
                 strcmp(opts.qp_solver, "PARTIAL_CONDENSING_QPDUNES") || ...
@@ -1077,6 +1077,10 @@ classdef AcadosOcp < handle
                     error('nlp_solver_step_length and globalization_fixed_step_length are both set, please use only globalization_fixed_step_length.');
                 end
                 opts.globalization_fixed_step_length = opts.nlp_solver_step_length;
+            end
+
+            if opts.globalization_fixed_step_length < 0.0 || opts.globalization_fixed_step_length > 1.0
+                error('globalization_fixed_step_length must be in [0, 1].');
             end
 
             % Set default parameters for globalization
