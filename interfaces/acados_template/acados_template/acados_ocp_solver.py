@@ -478,7 +478,7 @@ class AcadosOcpSolver:
         The t and lambda values are clipped according to `solution_sens_qp_t_lam_min` to avoid ill-conditioning.
         Then the Hessian matrix is factorized.
 
-        If a two-solver approach is used to obtain solution sensitivities from acados, this function should be called before calling `eval_solution_sensitivity`, or `eval_adjoint_solution_sensitivity()`.
+        To obtain accurate solution sensitivities from acados, this function should be called before calling `eval_solution_sensitivity`, or `eval_adjoint_solution_sensitivity()`.
 
         This is only implemented for HPIPM QP solver without condensing.
         """
@@ -1601,6 +1601,8 @@ class AcadosOcpSolver:
                 return full_stats[6, :]
             elif self.__solver_options['nlp_solver_type'] == 'SQP_RTI':
                 return full_stats[2, :]
+            else:
+                raise ValueError(f"qp_iter is not available for nlp_solver_type {self.__solver_options['nlp_solver_type']}.")
 
         elif field_ == "qp_res_ineq":
             if not self.__solver_options['nlp_solver_ext_qp_res']:
