@@ -157,6 +157,9 @@ if(ACADOS_PYTHON)
     add_test(NAME python_test_reset
         COMMAND "${CMAKE_COMMAND}" -E chdir ${PROJECT_SOURCE_DIR}/examples/acados_python/tests
         python reset_test.py)
+    add_test(NAME python_test_static_lib
+        COMMAND "${CMAKE_COMMAND}" -E chdir ${PROJECT_SOURCE_DIR}/examples/acados_python/tests
+        python static_lib_test.py)
     add_test(NAME python_test_reset_timing
         COMMAND "${CMAKE_COMMAND}" -E chdir ${PROJECT_SOURCE_DIR}/examples/acados_python/timing_example
         python reset_timing.py)
@@ -268,6 +271,10 @@ add_test(NAME python_pendulum_ocp_example_cmake
         COMMAND "${CMAKE_COMMAND}" -E chdir ${PROJECT_SOURCE_DIR}/examples/acados_python/pendulum_on_cart/ocp
         python ocp_example_h_init_contraints.py)
 
+    add_test(NAME python_slack_min_formulation
+        COMMAND "${CMAKE_COMMAND}" -E chdir ${PROJECT_SOURCE_DIR}/examples/acados_python/pendulum_on_cart/ocp
+        python slack_min_formulation.py)
+
     add_test(NAME python_chain_ocp
         COMMAND "${CMAKE_COMMAND}" -E chdir ${PROJECT_SOURCE_DIR}/examples/acados_python/chain_mass
         python main.py)
@@ -311,6 +318,10 @@ add_test(NAME python_pendulum_ocp_example_cmake
     add_test(NAME python_armijo_test
         COMMAND "${CMAKE_COMMAND}" -E chdir ${PROJECT_SOURCE_DIR}/examples/acados_python/tests
         python armijo_test.py)
+
+    add_test(NAME python_pcond_getters_test
+        COMMAND "${CMAKE_COMMAND}" -E chdir ${PROJECT_SOURCE_DIR}/examples/acados_python/tests
+        python pcond_getters_test.py)
 
     # Test NaN in globalization
     add_test(NAME python_test_nan_globalization
@@ -367,18 +378,24 @@ add_test(NAME python_pendulum_ocp_example_cmake
     add_test(NAME python_casadi_get_set_example
         COMMAND "${CMAKE_COMMAND}" -E chdir ${PROJECT_SOURCE_DIR}/examples/acados_python/casadi_tests
         python test_casadi_get_set.py)
-    add_test(NAME test_casadi_parametric
+    add_test(NAME python_test_casadi_parametric
         COMMAND "${CMAKE_COMMAND}" -E chdir ${PROJECT_SOURCE_DIR}/examples/acados_python/casadi_tests
         python test_casadi_parametric.py)
-    add_test(NAME test_casadi_p_in_constraint_and_cost
+    add_test(NAME python_test_casadi_p_in_constraint_and_cost
         COMMAND "${CMAKE_COMMAND}" -E chdir ${PROJECT_SOURCE_DIR}/examples/acados_python/casadi_tests
         python test_casadi_p_in_constraint_and_cost.py)
-    add_test(NAME test_casadi_constraint
+    add_test(NAME python_test_casadi_constraint
         COMMAND "${CMAKE_COMMAND}" -E chdir ${PROJECT_SOURCE_DIR}/examples/acados_python/casadi_tests
         python test_casadi_constraint.py)
-    add_test(NAME test_casadi_slack_in_h
+    add_test(NAME python_test_casadi_slack_in_h
         COMMAND "${CMAKE_COMMAND}" -E chdir ${PROJECT_SOURCE_DIR}/examples/acados_python/casadi_tests
         python test_casadi_slack_in_h.py)
+    add_test(NAME python_test_casadi_single_shooting
+        COMMAND "${CMAKE_COMMAND}" -E chdir ${PROJECT_SOURCE_DIR}/examples/acados_python/casadi_tests
+        python test_casadi_single_shooting.py)
+    add_test(NAME python_test_casadi_LICQ_violation
+        COMMAND "${CMAKE_COMMAND}" -E chdir ${PROJECT_SOURCE_DIR}/examples/acados_python/casadi_tests
+        python test_casadi_LICQ_violation.py)
 
     # Sim
     add_test(NAME python_pendulum_ext_sim_example
@@ -459,10 +476,12 @@ add_test(NAME python_pendulum_ocp_example_cmake
     set_tests_properties(python_fast_zoro_example PROPERTIES DEPENDS python_zoro_diff_drive_example)
 
     # casadi_tests
-    set_tests_properties(python_casadi_get_set_example PROPERTIES DEPENDS test_casadi_p_in_constraint_and_cost)
-    set_tests_properties(test_casadi_p_in_constraint_and_cost PROPERTIES DEPENDS test_casadi_parametric)
-    set_tests_properties(test_casadi_constraint PROPERTIES DEPENDS python_casadi_get_set_example)
-    set_tests_properties(test_casadi_slack_in_h PROPERTIES DEPENDS test_casadi_constraint)
+    set_tests_properties(python_casadi_get_set_example PROPERTIES DEPENDS python_test_casadi_p_in_constraint_and_cost)
+    set_tests_properties(python_test_casadi_p_in_constraint_and_cost PROPERTIES DEPENDS python_test_casadi_parametric)
+    set_tests_properties(python_test_casadi_constraint PROPERTIES DEPENDS python_casadi_get_set_example)
+    set_tests_properties(python_test_casadi_slack_in_h PROPERTIES DEPENDS python_test_casadi_constraint)
+    set_tests_properties(python_test_casadi_single_shooting PROPERTIES DEPENDS python_test_casadi_slack_in_h)
+    set_tests_properties(python_test_casadi_LICQ_violation PROPERTIES DEPENDS python_test_casadi_single_shooting)
 
     # Directory getting_started
     set_tests_properties(python_pendulum_sim_example PROPERTIES DEPENDS python_pendulum_ocp_example)
@@ -486,6 +505,8 @@ add_test(NAME python_pendulum_ocp_example_cmake
     set_tests_properties(python_regularization_test PROPERTIES DEPENDS python_test_sim_dae)
     set_tests_properties(python_test_sim_dae PROPERTIES DEPENDS python_sparse_param_test)
     set_tests_properties(python_sparse_param_test PROPERTIES DEPENDS python_test_detect_constraints)
+    set_tests_properties(python_test_detect_constraints PROPERTIES DEPENDS python_test_static_lib)
+    set_tests_properties(python_test_static_lib PROPERTIES DEPENDS python_pcond_getters_test)
 
     if(ACADOS_WITH_OSQP)
         set_tests_properties(python_test_detect_constraints PROPERTIES DEPENDS python_OSQP_test)
@@ -518,7 +539,8 @@ add_test(NAME python_pendulum_ocp_example_cmake
     set_tests_properties(python_nonuniform_discretization_ocp_example PROPERTIES DEPENDS python_rti_loop_ocp_example)
     set_tests_properties(python_rti_loop_ocp_example PROPERTIES DEPENDS python_render_simulink_wrapper)
     set_tests_properties(python_render_simulink_wrapper PROPERTIES DEPENDS python_constraints_expression_example)
-    set_tests_properties(python_constraints_expression_example PROPERTIES DEPENDS pendulum_optimal_value_gradient)
+    set_tests_properties(python_constraints_expression_example PROPERTIES DEPENDS python_slack_min_formulation)
+    set_tests_properties(python_slack_min_formulation PROPERTIES DEPENDS pendulum_optimal_value_gradient)
     set_tests_properties(pendulum_optimal_value_gradient PROPERTIES DEPENDS python_pendulum_ocp_IRK)
     set_tests_properties(python_pendulum_ocp_IRK PROPERTIES DEPENDS python_pendulum_ocp_GNSF)
     set_tests_properties(python_pendulum_ocp_GNSF PROPERTIES DEPENDS python_example_ocp_dynamics_formulations_cmake)
